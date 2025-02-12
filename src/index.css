@@ -1,0 +1,17 @@
+body {
+    margin: 0;
+}
+
+.rootDiv {
+    width: 100vw;
+    min-height: 100vh;
+    background: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .gameContainer {
+        display: flex;
+        flex-direction: column;
+    }
