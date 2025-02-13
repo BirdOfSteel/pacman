@@ -1,4 +1,4 @@
-const mapArray = [
+let mapArray = [
     "┌---------------------------┐",
     "|............┌-┐............|",
     "|.┌--┐.┌---┐.| |.┌---┐.┌--┐.|",
@@ -33,6 +33,7 @@ const mapArray = [
 ];
 
 let points = 0;
+document.getElementById('points-text').innerHTML = `Points: ${points}`;
 
 function isNextPositionValid(posX, posY, direction) {
     const nextPositionInArray = mapArray[posY + direction.y][posX + direction.x];
@@ -67,10 +68,24 @@ function isNextPositionValid(posX, posY, direction) {
     return { isNextPositionTrue, nextPositionInArray };
 }
 
+function handleGetCollectable(posX, posY) {
+    // console.log(mapArray[posY]) // this logs current row. can be used to verify array position is synced with visual position.
+    let rowAsArray = [...mapArray[posY]];
+
+    if (rowAsArray[posX] === '.') {
+        rowAsArray[posX] = ' ';
+        mapArray[posY] = rowAsArray.join('');
+
+        points += 10;
+        document.getElementById('points-text').innerHTML = `Points: ${points}`;
+    }
+    
+}
+
 class Pacman {
     constructor() {
-        this.posX = 14;
-        this.posY = 23;
+        this.posX = 14; // starting x
+        this.posY = 23; // starting y
         this.nextPosition = null;
         this.direction = {x: 1, y: 0};
         this.queuedDirection = {x: 0, y: 0};
@@ -88,6 +103,8 @@ class Pacman {
             Math.PI * 2
         );
         ctx.fill();
+
+        handleGetCollectable(this.posX, this.posY);
     }
 
     move(ctx) {
@@ -108,18 +125,10 @@ class Pacman {
         if (!isDirectionEqualToQueuedDirection && nextQueuedPosition.isNextPositionTrue) {
             this.direction = this.queuedDirection;
 
-            
-            ctx.clearRect( // IMPORTANT: this is constantly looped, removing the pixels over pacman. Adjust below values to position where the rectangle should be cut from. 
-                this.posX * tileSize - 11, 
-                this.posY * tileSize - 12,  
-                32, 
-                32
-            );
-
             this.posX = this.posX + this.direction.x;
             this.posY = this.posY + this.direction.y;
-        } else if (nextPosition.isNextPositionTrue) {
 
+        } else if (nextPosition.isNextPositionTrue) {
 
             this.posX = this.posX + this.direction.x;
             this.posY = this.posY + this.direction.y;
@@ -215,7 +224,7 @@ for (let row = 0; row < mapArray.length; row++) {
 pacman.initialisePosition(ctx)
 
 function gameLoop() {
-    setInterval(() => pacman.move(ctx), 500)
+    setInterval(() => pacman.move(ctx), 250)
 }
 
 setTimeout(() => {
@@ -227,19 +236,11 @@ window.addEventListener('keydown', (e) => {
 
     if (e.key === 'ArrowUp' || e.key === 'w') {
         pacman.queuedDirection = {x: 0, y: -1};
-        // const { nextPositionInArray } = isNextPositionValid(pacman.posX, pacman.posY, {x: 0, y: -1})
-        // console.log(nextPositionInArray)
     } else if (e.key === 'ArrowRight' || e.key === 'd') {
         pacman.queuedDirection = {x: 1, y: 0};
-
     } else if (e.key === 'ArrowLeft' || e.key === 'a') {
         pacman.queuedDirection = {x: -1, y: 0};
-        
-
     } else if (e.key === 'ArrowDown' || e.key === 's') {
         pacman.queuedDirection = {x: 0, y: 1};
     }
 })
-
-
-document.getElementById('points-text').innerHTML = `Points: ${points}`;
