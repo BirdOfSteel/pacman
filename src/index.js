@@ -113,31 +113,52 @@ class Pinky {
         const nextPosition = isNextPositionValid(this.posX,this.posY, this.direction);
 
         if (nextPosition.isNextPositionAllowed) {
-            this.posY = 11
+            this.posY = this.posY - 1;
         } else {
+            this.posY = 11;
             this.isExitingBase = false;
             this.isExploring = true;
         }
     }
     
     exploreMap() {
-        const nextPosition = isNextPositionValid(this.posX, this.posY, this.direction);
+        let allowedMovementArray = findWhereGhostCanMove(this.posX, this.posY);
         
-        if (!nextPosition.isNextPositionAllowed) {
-            let allowedMovementArray = findWhereGhostCanMove(this.posX, this.posY);
-            allowedMovementArray = allowedMovementArray.filter((directionObject) => {
-                const x = directionObject.x;
-                const y = directionObject.y;
-                return directionObject.x != this.direction.x && directionObject.y != this.direction.y;
-            })
+        let oppositeDirection = {x: 0, y: 0};
 
+        switch (this.direction.x) {
+            case 1: 
+                oppositeDirection.x = -1;
+                break;
+            case -1:
+                oppositeDirection.x = 1;
+                break;
+        }
+
+        switch (this.direction.y) {
+            case 1: 
+                oppositeDirection.y = -1;
+                break;
+            case -1:
+                oppositeDirection.y = 1;
+                break;
+        }
+
+
+        allowedMovementArray = allowedMovementArray.filter((directionObject) => {
+            const x = directionObject.x;
+            const y = directionObject.y;
+            
+            return x !== oppositeDirection.x && y !== oppositeDirection.y;
+        })
+
+        if (allowedMovementArray.length > 0) {
             const randomNumber = Math.floor(Math.random() * allowedMovementArray.length);
             const randomDirection = allowedMovementArray[randomNumber];
-            console.log(this.direction)
-            console.log(allowedMovementArray)
-
             this.direction = randomDirection;
         }
+
+
 
         this.posX = this.posX + this.direction.x;
         this.posY = this.posY + this.direction.y;
@@ -169,7 +190,7 @@ function handleReleaseGhosts() {
     setTimeout(() => { // release pinky
         pinky.isIdle = false;
         pinky.isExitingBase = true;
-    },2000)
+    },1000)
 }
 //
 

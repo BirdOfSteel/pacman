@@ -5,7 +5,7 @@ export default function isNextPositionValid(posX, posY, direction) {
     let isNextPositionAllowed = true;
 
     switch (nextPositionInArray) {
-        case '|': case '-': case '└': case '┘': case '┌': case '┐':
+        case '|': case '-': case '└': case '┘': case '┌': case '┐': case '=':
             isNextPositionAllowed = false;
             break;
     }
