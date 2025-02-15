@@ -67,6 +67,7 @@ class Pinky {
         this.posX = 14;
         this.posY = 13;
         this.direction = {x: 0, y: 0};
+        this.previousDirection = {x: 0, y: 0};
 
         this.isIdle = true;
 
@@ -123,9 +124,18 @@ class Pinky {
         const nextPosition = isNextPositionValid(this.posX, this.posY, this.direction);
         
         if (!nextPosition.isNextPositionAllowed) {
-            const allowedMovementArray = findWhereGhostCanMove(this.posX, this.posY);
+            let allowedMovementArray = findWhereGhostCanMove(this.posX, this.posY);
+            allowedMovementArray = allowedMovementArray.filter((directionObject) => {
+                const x = directionObject.x;
+                const y = directionObject.y;
+                return directionObject.x != this.direction.x && directionObject.y != this.direction.y;
+            })
+
             const randomNumber = Math.floor(Math.random() * allowedMovementArray.length);
             const randomDirection = allowedMovementArray[randomNumber];
+            console.log(this.direction)
+            console.log(allowedMovementArray)
+
             this.direction = randomDirection;
         }
 
