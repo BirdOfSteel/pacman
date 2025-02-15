@@ -25,3 +25,21 @@ body {
         left: 5%;
         font-weight: bolder;
     }
+
+    #game-end-div {
+        color: yellow;
+        position: absolute;
+        background: black;
+        height: 100px;
+        width: 300px;
+        display: none;;
+        align-items: center;
+        justify-content: center;
+        border: 5px solid grey;
+        border-radius: 5px;
+    }
+
+        #game-end-div > p {
+            margin: 0;
+            color: yellow;
+        }

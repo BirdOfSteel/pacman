@@ -17,7 +17,7 @@ export let mapArray = [
     "     |.||           ||.|     ",
     "     |.|| ┌--===--┐ ||.|     ",
     "-----┘.└┘ |       | └┘.└-----",
-    "|     .   |       |   .     |",
+    "|    |.   |       |   .|    |",
     "-----┐.┌┐ └-------┘ ┌┐.┌-----",
     "     |.||           ||.|     ",
     "     |.|| ┌-------┐ ||.|     ",
@@ -26,7 +26,7 @@ export let mapArray = [
     "|............| |............|",
     "|.┌--┐.┌---┐.| |.┌---┐.┌--┐.|",
     "|.└-┐|.└---┘.└-┘.└---┘.|┌-┘.|",
-    "|o..||........p........||..o|",
+    "|o..||........ ........||..o|",
     "└-┐.||.┌┐.┌-------┐.┌┐.||.┌-┘",
     "┌-┘.└┘.||.└--┐ ┌--┘.||.└┘.└-┐",
     "|......||....| |....||......|",
@@ -44,7 +44,7 @@ canvas.width = tileSize * mapArray[0].length;
 canvas.height = tileSize * mapArray.length;
 
 // initialise map
-function initialiseMap() {
+export function initialiseMap() {
     for (let row = 0; row < mapArray.length; row++) {
         for (let col = 0; col < mapArray[0].length; col++) {
             const char = mapAsRows[row][col]
@@ -113,5 +113,3 @@ function initialiseMap() {
         }
     }
 }
-
-initialiseMap();

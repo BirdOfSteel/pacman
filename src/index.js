@@ -1,227 +1,57 @@
-import { tileSize } from './map.js';
 import { ctx } from './ctx.js';
-import isNextPositionValid from './utils/isNextPositionValid.js';
-import handleGetCollectable, { points } from './utils/handleGetCollectable.js';
-import findWhereGhostCanMove from './utils/findWhereGhostCanMove.js';
+
+import { pacman } from './classes/Pacman.js';
+import { pinky } from './classes/Ghost.js';
+
+import { points, resetPoints } from './utils/handleGetCollectable.js';
 import hasAControlBeenPressed from './utils/hasAControlBeenPressed.js';
+import { initialiseMap } from './map.js';
+
+
+export let isGameRunning = false;
+export let gameInterval = null;
+
+export function setIsGameRunning(state) {
+    isGameRunning = state;
+}
 
 document.getElementById('points-text').innerHTML = `Points: ${points}`;
 
-class Pacman {
-    constructor() {
-        this.posX = 14; // starting x
-        this.posY = 23; // starting y
-        this.direction = {x: 0, y: 0};
-        this.queuedDirection = {x: 0, y: 0};
-    }
-
-    initialisePosition() {
-        document.getElementById('pacman-container');
-        ctx.fillStyle = 'yellow';
-        ctx.beginPath();
-        ctx.arc(
-            this.posX*tileSize + 5, 
-            this.posY*tileSize + 4, 
-            16, 
-            0, 
-            Math.PI * 2
-        );
-        ctx.fill();
-
-        handleGetCollectable(this.posX, this.posY);
-    }
-
-    move() {
-        const nextPosition = isNextPositionValid(this.posX,this.posY, this.direction);
-        const nextQueuedPosition = isNextPositionValid(this.posX, this.posY, this.queuedDirection); 
+function prepareGame() {
+    resetPoints();
     
-        const isDirectionEqualToQueuedDirection =
-            JSON.stringify(this.direction) === JSON.stringify(this.queuedDirection)
+    pacman.posX = 14;
+    pacman.posY = 23;
+    pinky.posX = 14;
+    pinky.posY = 13;
 
-        
-        ctx.clearRect( // IMPORTANT: this is constantly looped, removing the pixels over pacman. Adjust below values to position where the rectangle should be cut from. 
-            this.posX * tileSize - 11, 
-            this.posY * tileSize - 12,  
-            32, 
-            32
-        );
-
-        if (!isDirectionEqualToQueuedDirection && nextQueuedPosition.isNextPositionAllowed) {
-            this.direction = this.queuedDirection;
-
-            this.posX = this.posX + this.direction.x;
-            this.posY = this.posY + this.direction.y;
-
-        } else if (nextPosition.isNextPositionAllowed) {
-
-            this.posX = this.posX + this.direction.x;
-            this.posY = this.posY + this.direction.y;
-        } 
-
-        this.initialisePosition();
-    }
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    initialiseMap();
+    
+    pacman.initialisePosition(ctx);
+    pinky.initialisePosition(ctx);
 }
 
-class Pinky {
-    constructor() {
-        this.posX = 14;
-        this.posY = 13;
-        this.direction = {x: 0, y: 0};
-        this.previousDirection = {x: 0, y: 0};
+prepareGame();
 
-        this.isIdle = true;
-
-        this.isExitingBase = false;
-        this.isExploring = false;
-    }
-
-    initialisePosition() {
-        document.getElementById('pacman-container');
-        ctx.fillStyle = 'pink';
-        ctx.beginPath();
-        ctx.arc(
-            this.posX*tileSize + 5, 
-            this.posY*tileSize + 4, 
-            16, 
-            0, 
-            Math.PI * 2
-        );
-        ctx.fill();
-    }
-
-    clearLastPosition() {
-        ctx.clearRect( // IMPORTANT: this is constantly looped, removing the pixels over pacman. Adjust below values to position where the rectangle should be cut from. 
-            this.posX * tileSize - 11, 
-            this.posY * tileSize - 12,  
-            32, 
-            32
-        );
-    }
-
-    idleMovement() {
-
-        if (this.direction.y === 0 || this.direction.y === -1) {
-            this.direction.y = 1;
-        } else {
-            this.direction.y = -1;
-        }
-        
-        this.posY = this.posY + this.direction.y;
-    }
-
-    releaseFromBase() {
-        const nextPosition = isNextPositionValid(this.posX,this.posY, this.direction);
-
-        if (nextPosition.isNextPositionAllowed) {
-            this.posY = this.posY - 1;
-        } else {
-            this.posY = 11;
-            this.isExitingBase = false;
-            this.isExploring = true;
-        }
-    }
-    
-    exploreMap() {
-        let allowedMovementArray = findWhereGhostCanMove(this.posX, this.posY);
-        
-        let oppositeDirection = {x: 0, y: 0};
-
-        switch (this.direction.x) {
-            case 1: 
-                oppositeDirection.x = -1;
-                break;
-            case -1:
-                oppositeDirection.x = 1;
-                break;
-        }
-
-        switch (this.direction.y) {
-            case 1: 
-                oppositeDirection.y = -1;
-                break;
-            case -1:
-                oppositeDirection.y = 1;
-                break;
-        }
-
-
-        allowedMovementArray = allowedMovementArray.filter((directionObject) => {
-            const x = directionObject.x;
-            const y = directionObject.y;
-            
-            return x !== oppositeDirection.x && y !== oppositeDirection.y;
-        })
-
-        if (allowedMovementArray.length > 0) {
-            const randomNumber = Math.floor(Math.random() * allowedMovementArray.length);
-            const randomDirection = allowedMovementArray[randomNumber];
-            this.direction = randomDirection;
-        }
-
-
-
-        this.posX = this.posX + this.direction.x;
-        this.posY = this.posY + this.direction.y;
-    }
-
-    move() {
-        if (isGameRunning) {
-            this.clearLastPosition();
-
-            if (this.isIdle) {
-                this.idleMovement();
-            } else if (this.isExitingBase) {
-                this.releaseFromBase();
-            } else if (this.isExploring) {
-                this.exploreMap();
-            }
-            
-            this.initialisePosition();
-        }
-    }
-}
-
-
-
-//
 let hasHandleReleaseGhostsRun = false;
 
-function handleReleaseGhosts() {
-    setTimeout(() => { // release pinky
-        pinky.isIdle = false;
-        pinky.isExitingBase = true;
-    },1000)
-}
-//
-
-
-const pacman = new Pacman();
-const pinky = new Pinky();
-
-
-// set up and loop game
-
-let isGameRunning = false;
-
-pacman.initialisePosition(ctx);
-pinky.initialisePosition(ctx);
-
 function handleMovements() {
+    if (!isGameRunning) return;
+
     pacman.move(ctx);
     pinky.move(ctx);
-
-    if (!hasHandleReleaseGhostsRun) {
-        hasHandleReleaseGhostsRun = true;
-        handleReleaseGhosts();
-        console.log("RAN")
-    }
 }
 
 function gameLoop() {
     if (isGameRunning) {
-        setInterval(() => handleMovements(), 250)
+        console.log("running")
+        if (gameInterval === null) {
+            gameInterval = setInterval(() => handleMovements(), 250)
+        }
     }
 }
+
 
 // controls
 
@@ -240,8 +70,12 @@ window.addEventListener('keydown', (e) => {
 
     if (!isGameRunning) {
         if (hasAControlBeenPressed(e.key)) {
-            isGameRunning = true;
+            setIsGameRunning(true);
             gameLoop();
         }
+    }
+
+    if (e.key === 'i') {
+        prepareGame();
     }
 })
