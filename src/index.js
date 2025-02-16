@@ -1,4 +1,4 @@
-import { ctx } from './ctx.js';
+import { mapContext } from './ctx.js';
 
 import { pacman } from './classes/Pacman.js';
 import { pinky } from './classes/Ghost.js';
@@ -14,6 +14,11 @@ export function setIsGameRunning(state) {
     isGameRunning = state;
 }
 
+// Important variables:
+// - In Ghost.js, the Ghost class contains a method called 
+//   handleIncreaseProbabilityOfChase. Difficulty can be controlled
+//   by modifying difficultyIncrement and difficultyPerPoints.
+
 document.getElementById('points-text').innerHTML = `Points: ${points}`;
 
 function prepareGame() {
@@ -24,11 +29,11 @@ function prepareGame() {
     pinky.posX = 14;
     pinky.posY = 13;
 
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    mapContext.clearRect(0, 0, mapContext.canvas.width, mapContext.canvas.height);
     initialiseMap();
     
-    pacman.initialisePosition(ctx);
-    pinky.initialisePosition(ctx);
+    pacman.initialisePosition(mapContext);
+    pinky.initialisePosition(mapContext);
 }
 
 prepareGame();
@@ -36,15 +41,15 @@ prepareGame();
 function handleMovements() {
     if (!isGameRunning) return;
 
-    pacman.move(ctx);
-    pinky.move(ctx);
+    pacman.move(mapContext);
+    pinky.move(mapContext);
 }
 
 function gameLoop() {
     if (isGameRunning) {
         console.log("running")
         if (gameInterval === null) {
-            gameInterval = setInterval(() => handleMovements(), 250)
+            gameInterval = setInterval(() => handleMovements(), 200)
         }
     }
 }

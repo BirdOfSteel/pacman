@@ -8,13 +8,14 @@ export default function findWhereGhostCanMove(posX, posY) {
         {x:0, y:-1} 
     ]
 
-    let allowedDirectionsArray = [];
-    
+    let allowedCoordinatesArray = [];
+
     for (let i = 0; i < directionsArray.length; i++) {
-        if (isNextPositionValid(posX, posY, directionsArray[i]).isNextPositionAllowed) {
-            allowedDirectionsArray.push(directionsArray[i]);
+        const nextPositionObject = isNextPositionValid(posX, posY, directionsArray[i]);
+        if (nextPositionObject.isAllowed) {
+            allowedCoordinatesArray.push(nextPositionObject);
         }
     }
-    
-    return allowedDirectionsArray;
+
+    return allowedCoordinatesArray;
 }

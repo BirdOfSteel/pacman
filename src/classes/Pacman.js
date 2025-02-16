@@ -1,4 +1,4 @@
-import { ctx } from "../ctx.js";
+import { mapContext } from "../ctx.js";
 import { setIsGameRunning } from "../index.js";
 import { tileSize } from "../utils/map.js";
 import handleGetCollectable from "../utils/handleGetCollectable.js";
@@ -29,22 +29,22 @@ class Pacman {
 
     initialisePosition() {
         document.getElementById('pacman-container');
-        ctx.fillStyle = 'yellow';
-        ctx.beginPath();
-        ctx.arc(
+        mapContext.fillStyle = 'yellow';
+        mapContext.beginPath();
+        mapContext.arc(
             this.posX*tileSize + 5, 
             this.posY*tileSize + 4, 
-            16, 
+            tileSize / 1.75, 
             0, 
             Math.PI * 2
         );
-        ctx.fill();
+        mapContext.fill();
 
         handleGetCollectable(this.posX, this.posY);
     }
 
     clearLastPosition() {
-        ctx.clearRect( // IMPORTANT: this is constantly looped, removing the pixels over pacman. Adjust below values to position where the rectangle should be cut from. 
+        mapContext.clearRect( // IMPORTANT: this is constantly looped, removing the pixels over pacman. Adjust below values to position where the rectangle should be cut from. 
             this.posX * tileSize - 11, 
             this.posY * tileSize - 12,  
             32, 
@@ -54,8 +54,7 @@ class Pacman {
 
     checkForGameEnd() {
         const pacmanLocation = {x: this.posX, y: this.posY};
-        const pinkyLocation = {x: pinky.posX, y: pinky.posY};
-        const ghostsArray = [pinky]; // add ghosts to this array
+        const ghostsArray = [pinky]; // add ghosts to this array for collision detection
 
         let isPacmanOnGhost = false;
 
@@ -83,17 +82,16 @@ class Pacman {
 
         const nextPosition = isNextPositionValid(this.posX,this.posY, this.direction);
         const nextQueuedPosition = isNextPositionValid(this.posX, this.posY, this.queuedDirection); 
-    
+
         const isDirectionEqualToQueuedDirection =
             JSON.stringify(this.direction) === JSON.stringify(this.queuedDirection);
 
-        if (!isDirectionEqualToQueuedDirection && nextQueuedPosition.isNextPositionAllowed) {
+        if (!isDirectionEqualToQueuedDirection && nextQueuedPosition.isAllowed) {
             this.direction = this.queuedDirection;
 
             this.posX = this.posX + this.direction.x;
             this.posY = this.posY + this.direction.y;
-
-        } else if (nextPosition.isNextPositionAllowed) {
+        } else if (nextPosition.isAllowed) {
 
             this.posX = this.posX + this.direction.x;
             this.posY = this.posY + this.direction.y;

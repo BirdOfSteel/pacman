@@ -1,19 +1,23 @@
 import { mapArray } from "./map.js";
 
 export default function isNextPositionValid(posX, posY, direction) {
-    const nextPositionInArray = mapArray[posY + direction.y][posX + direction.x];
-    let isNextPositionAllowed = true;
+    const nextPositionAsTile = mapArray[posY + direction.y][posX + direction.x];
+    let nextPositionObject = {
+        x: posX + direction.x, 
+        y: posY + direction.y, 
+        char: nextPositionAsTile,
+        isAllowed: true
+    };
 
-    switch (nextPositionInArray) {
+    switch (nextPositionAsTile) {
         case '|': case '-': case '└': case '┘': case '┌': case '┐': case '=':
-            isNextPositionAllowed = false;
+            nextPositionObject.isAllowed = false;
             break;
     }
 
-    if (direction.x === 0 && direction.y === 0) {
-        isNextPositionAllowed = false;
-    }
+    // if (nextPositionObject.isAllowed) {
+    //     console.log(nextPositionObject)
+    // }
 
-
-    return { isNextPositionAllowed, nextPositionInArray };
+    return nextPositionObject;
 }

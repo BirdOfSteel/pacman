@@ -1,6 +1,9 @@
 import { pacman } from "../classes/Pacman.js";
 
-export default function directionTowardsPacman(ghostX, ghostY) {
+// UNUSED FUNCTION!!
+// Very basic algorithm to chase pacman. Replaced by A* pathfinder.
+
+export default function directionTowardsPacman(ghostX, ghostY) { 
     let myDirection = {x: 0, y: 0};
     
     // Horizontal movement (X-axis)
