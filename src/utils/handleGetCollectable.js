@@ -1,4 +1,4 @@
-import { mapArray } from "../map.js";
+import { mapArray } from "./map.js";
 
 export let points = 0;
 document.getElementById('points-text').innerHTML = `Points: ${points}`;

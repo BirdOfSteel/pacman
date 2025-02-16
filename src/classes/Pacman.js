@@ -1,6 +1,6 @@
 import { ctx } from "../ctx.js";
 import { setIsGameRunning } from "../index.js";
-import { tileSize } from "../map.js";
+import { tileSize } from "../utils/map.js";
 import handleGetCollectable from "../utils/handleGetCollectable.js";
 import isNextPositionValid from "../utils/isNextPositionValid.js";
 import updateCharacterPositionOnMap from "../utils/updateCharacterPositionOnMap.js";

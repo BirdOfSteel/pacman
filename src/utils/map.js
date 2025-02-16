@@ -1,4 +1,4 @@
-import { ctx, canvas } from './ctx.js';
+import { ctx, canvas } from '../ctx.js';
 
 export const tileSize = 28;
 

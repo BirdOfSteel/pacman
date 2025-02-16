@@ -5,8 +5,7 @@ import { pinky } from './classes/Ghost.js';
 
 import { points, resetPoints } from './utils/handleGetCollectable.js';
 import hasAControlBeenPressed from './utils/hasAControlBeenPressed.js';
-import { initialiseMap } from './map.js';
-
+import { initialiseMap } from './utils/map.js';
 
 export let isGameRunning = false;
 export let gameInterval = null;
@@ -19,7 +18,7 @@ document.getElementById('points-text').innerHTML = `Points: ${points}`;
 
 function prepareGame() {
     resetPoints();
-    
+
     pacman.posX = 14;
     pacman.posY = 23;
     pinky.posX = 14;
@@ -33,8 +32,6 @@ function prepareGame() {
 }
 
 prepareGame();
-
-let hasHandleReleaseGhostsRun = false;
 
 function handleMovements() {
     if (!isGameRunning) return;

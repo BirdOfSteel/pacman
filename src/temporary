@@ -1,0 +1,26 @@
+let isChasePacmanDirectionInArray = false;
+
+        for (let i=0; i < allowedMovementArray.length; i++) {
+            const movementObjectX = allowedMovementArray[i].x;
+            const movementObjectY = allowedMovementArray[i].y;
+
+            if (chasePacmanDirection.x === movementObjectX && chasePacmanDirection.y === movementObjectY) {
+                isChasePacmanDirectionInArray = true;
+            }
+        }
+
+        if (isChasePacmanDirectionInArray) {
+            this.posX = this.posX + chasePacmanDirection.x;
+            this.posY = this.posY + chasePacmanDirection.y;
+
+            this.direction = chasePacmanDirection;
+        } 
+
+        else {
+            const randomNumber = Math.floor(Math.random() * allowedMovementArray.length);
+            const randomDirection = allowedMovementArray[randomNumber];
+            this.direction = randomDirection;
+
+            this.posX = this.posX + this.direction.x;
+            this.posY = this.posY + this.direction.y;
+        }

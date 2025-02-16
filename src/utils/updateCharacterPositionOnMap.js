@@ -1,4 +1,4 @@
-import { mapArray } from "../map.js";
+import { mapArray } from "./map.js";
 
 export default function updateCharacterPositionOnMap(prevX, prevY, posX, posY, character) {
     let prevRowAsArray = [...mapArray[prevY]];

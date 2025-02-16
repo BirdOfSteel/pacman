@@ -1,10 +1,12 @@
 import { ctx } from "../ctx.js";
-import { tileSize } from "../map.js";
+import { tileSize } from "../utils/map.js";
 import { isGameRunning } from "../index.js";
 import updateCharacterPositionOnMap from "../utils/updateCharacterPositionOnMap.js";
 import isNextPositionValid from "../utils/isNextPositionValid.js";
 import findWhereGhostCanMove from "../utils/findWhereGhostCanMove.js";
 import directionTowardsPacman from "../utils/directionTowardsPacman.js";
+
+import { generatePath } from "../utils/pathFinder.js";
 
 class Ghost {
     constructor(name, colour, posX, posY, releaseDelay) {
@@ -88,7 +90,8 @@ class Ghost {
     exploreMap() {
         let allowedMovementArray = findWhereGhostCanMove(this.posX, this.posY);
         const chasePacmanDirection = directionTowardsPacman(this.posX, this.posY);
-        
+        const pathfinderArray = generatePath(this.posX, this.posY);
+
         let oppositeDirection = {x: 0, y: 0};
 
         switch (this.direction.x) {
@@ -111,40 +114,15 @@ class Ghost {
 
 
         allowedMovementArray = allowedMovementArray.filter((directionObject) => {
-            
             return (
                 directionObject.x != oppositeDirection.x || 
                 directionObject.y != oppositeDirection.y
             );
         })
-            
-        let isChasePacmanDirectionInArray = false;
 
-        for (let i=0; i < allowedMovementArray.length; i++) {
-            const movementObjectX = allowedMovementArray[i].x;
-            const movementObjectY = allowedMovementArray[i].y;
-
-            if (chasePacmanDirection.x === movementObjectX && chasePacmanDirection.y === movementObjectY) {
-                isChasePacmanDirectionInArray = true;
-            }
-        }
-
-        if (isChasePacmanDirectionInArray) {
-            this.posX = this.posX + chasePacmanDirection.x;
-            this.posY = this.posY + chasePacmanDirection.y;
-
-            this.direction = chasePacmanDirection;
-        } 
-
-        else {
-            const randomNumber = Math.floor(Math.random() * allowedMovementArray.length);
-            const randomDirection = allowedMovementArray[randomNumber];
-            this.direction = randomDirection;
-
-            this.posX = this.posX + this.direction.x;
-            this.posY = this.posY + this.direction.y;
-        }
-
+        // this.posX MUST be set to pathFinderArray[0].y co-ordinate, and so on for posX. Flipping them will break it.
+        this.posX = pathfinderArray[0].y;
+        this.posY = pathfinderArray[0].x;
     }
 
     move() {
@@ -165,6 +143,12 @@ class Ghost {
             this.updatePositionOnMap();
         }
     }
+}
+
+function convertPathfindToDirection(pathfinderObject) {
+    let newPosition = {x: pathfinderObject.y, y: pathfinderObject.x};
+    
+    return newPosition;
 }
 
 export const pinky = new Ghost('pinky', 'pink', 14, 13, 5000);

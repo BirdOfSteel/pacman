@@ -1,4 +1,4 @@
-import { mapArray } from "../map.js";
+import { mapArray } from "./map.js";
 
 export default function isNextPositionValid(posX, posY, direction) {
     const nextPositionInArray = mapArray[posY + direction.y][posX + direction.x];
