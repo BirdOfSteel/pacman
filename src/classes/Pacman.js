@@ -5,7 +5,7 @@ import handleGetCollectable from "../utils/handleGetCollectable.js";
 import isNextPositionValid from "../utils/isNextPositionValid.js";
 import updateCharacterPositionOnMap from "../utils/updateCharacterPositionOnMap.js";
 
-import { pinky } from "./Ghost.js";
+import { blinky, pinky, inky, clyde } from "./Ghost.js";
 
 class Pacman {
     constructor(startX, startY) {
@@ -54,7 +54,7 @@ class Pacman {
 
     checkForGameEnd() {
         const pacmanLocation = {x: this.posX, y: this.posY};
-        const ghostsArray = [pinky]; // add ghosts to this array for collision detection
+        const ghostsArray = [blinky, pinky, inky, clyde]; // add ghosts to this array for collision detection
 
         let isPacmanOnGhost = false;
 

@@ -1,7 +1,7 @@
 import { mapContext } from './ctx.js';
 
 import { pacman } from './classes/Pacman.js';
-import { pinky } from './classes/Ghost.js';
+import { blinky, pinky, inky, clyde } from './classes/Ghost.js';
 
 import { points, resetPoints } from './utils/handleGetCollectable.js';
 import hasAControlBeenPressed from './utils/hasAControlBeenPressed.js';
@@ -26,14 +26,15 @@ function prepareGame() {
 
     pacman.posX = 14;
     pacman.posY = 23;
-    pinky.posX = 14;
-    pinky.posY = 13;
 
     mapContext.clearRect(0, 0, mapContext.canvas.width, mapContext.canvas.height);
     initialiseMap();
     
     pacman.initialisePosition(mapContext);
+    blinky.initialisePosition(mapContext);
     pinky.initialisePosition(mapContext);
+    inky.initialisePosition(mapContext);
+    clyde.initialisePosition(mapContext);
 }
 
 prepareGame();
@@ -42,7 +43,10 @@ function handleMovements() {
     if (!isGameRunning) return;
 
     pacman.move(mapContext);
+    blinky.move(mapContext);
     pinky.move(mapContext);
+    inky.move(mapContext);
+    clyde.move(mapContext);
 }
 
 function gameLoop() {

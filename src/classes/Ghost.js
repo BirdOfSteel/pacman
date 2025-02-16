@@ -83,6 +83,7 @@ class Ghost {
         if (nextPosition.isNextPositionAllowed) {
             this.posY = this.posY - 1;
         } else {
+            this.posX = 14;
             this.posY = 11;
             this.recordLastPosition();
             this.isExitingBase = false;
@@ -187,8 +188,8 @@ class Ghost {
 
     move() {
         if (isGameRunning) {
-            this.clearLastPosition();
             this.handleIncreaseProbabilityOfChase();
+            this.clearLastPosition();
 
             if (points)
 
@@ -206,4 +207,7 @@ class Ghost {
     }
 }
 
-export const pinky = new Ghost('pinky', 'pink', 14, 13, 2000);
+export const blinky = new Ghost('blinky', 'red', 11, 13, 500);
+export const pinky = new Ghost('pinky', 'pink', 13, 13, 4000);
+export const inky = new Ghost('pinky', 'cyan', 15, 13, 12000);
+export const clyde = new Ghost('pinky', 'orange', 17, 13, 20000);
