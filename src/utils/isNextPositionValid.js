@@ -10,7 +10,7 @@ export default function isNextPositionValid(posX, posY, direction) {
     };
 
     switch (nextPositionAsTile) {
-        case '|': case '-': case '└': case '┘': case '┌': case '┐': case '=':
+        case '|': case '-': case '└': case '┘': case '┌': case '┐': case '=': case '>': case '<':
             nextPositionObject.isAllowed = false;
             break;
     }

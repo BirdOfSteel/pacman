@@ -81,11 +81,8 @@ class Pacman {
 
         const nextPosition = isNextPositionValid(this.posX,this.posY, this.direction);
         const nextQueuedPosition = isNextPositionValid(this.posX, this.posY, this.queuedDirection); 
-
-        const isDirectionEqualToQueuedDirection =
-            JSON.stringify(this.direction) === JSON.stringify(this.queuedDirection);
-
-        if (!isDirectionEqualToQueuedDirection && nextQueuedPosition.isAllowed) {
+        
+        if (nextQueuedPosition.isAllowed) {
             this.direction = this.queuedDirection;
 
             this.posX = this.posX + this.direction.x;
@@ -94,7 +91,14 @@ class Pacman {
 
             this.posX = this.posX + this.direction.x;
             this.posY = this.posY + this.direction.y;
-        } 
+        }
+        
+        // handles teleporting
+        if (nextPosition.char === '>') {
+            this.posX = 27;
+        } else if (nextPosition.char === '<') {
+            this.posX = 1;
+        }
 
         this.initialisePosition();
         this.updatePositionOnMap();
