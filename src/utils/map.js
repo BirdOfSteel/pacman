@@ -3,7 +3,7 @@ import { addToTotalPointsOnMap } from './totalPointsOnMap.js';
 
 export const tileSize = 20;
 
-export let mapArray = [
+export const mapArray = [
     "┌---------------------------┐",
     "|............┌-┐............|",
     "|.┌--┐.┌---┐.| |.┌---┐.┌--┐.|",
@@ -38,31 +38,32 @@ export let mapArray = [
 ];
 
 // turns map array into a map containg only points or empty spaces, which is used to keep track of points
-export const pointsMapArray = mapArray.map((currentRow) => {
-    let pointsRow = [];
 
-    for (let i = 0; i < currentRow.length; i++) {
-        console.log(currentRow[i]);
-        if (currentRow[i] === '.') {
-            pointsRow.push(currentRow[i])
-        } else {
-            pointsRow.push(" ")
+export function generatePointsMapArray() {
+    return mapArray.map((currentRow) => {
+        let pointsRow = [];
+    
+        for (let i = 0; i < currentRow.length; i++) {
+            if (currentRow[i] === '.') {
+                pointsRow.push(currentRow[i])
+            } else {
+                pointsRow.push(" ")
+            }
         }
-    }
-
-    return pointsRow.join('')
-})
+    
+        return pointsRow.join('')
+    })
+}
 
 const mapAsRows = mapArray.map((row) => {
     return [...row]
 })
 
+// set width for map and points canvas
 mapCanvas.width = tileSize * mapArray[0].length;
 mapCanvas.height = tileSize * mapArray.length;
 pointsCanvas.width = tileSize * mapArray[0].length;
 pointsCanvas.height = tileSize * mapArray.length;
-
-mapCanvas.globalAlpha = 0
 
 // initialise map
 export function initialiseMap() {

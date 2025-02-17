@@ -1,4 +1,3 @@
-import { mapContext } from "../ctx.js";
 import { tileSize } from "../utils/map.js";
 import { isGameRunning } from "../index.js";
 import updateCharacterPositionOnMap from "../utils/updateCharacterPositionOnMap.js";
@@ -8,17 +7,26 @@ import convertPathingTileToDirection from "../utils/convertPathingTileToDirectio
 import { points } from "../utils/handleGetCollectable.js";
 import { generatePath } from "../utils/pathFinder.js";
 import { totalPointsOnMap } from "../utils/totalPointsOnMap.js";
+import checkForGhostOverlap from "../utils/checkForGhostOverlap.js";
+import generateGhostCanvasArray from "../utils/generateGhostCanvasArray.js";
+
 
 class Ghost {
-    constructor(name, colour, startX, startY, delayRelease) {
+    constructor(name, colour, startX, startY, releaseDelay) {
         this.name = name;
         this.colour = colour;
 
+        this.releaseDelay = releaseDelay;
+
+        this.startX = startX;
+        this.startY = startY;
+
         this.posX = startX;
         this.posY = startY;
+        this.previousPosition = {x: 0, y: 0};
+        
         this.direction = {x: 0, y: 0};
         this.oppositeDirection = {x: 0, y: 0};
-        this.previousPosition = {x: 0, y: 0};
 
         this.isIdle = true;
         this.isExitingBase = false;
@@ -26,11 +34,6 @@ class Ghost {
 
         this.baseProbabilityOfChase = 0.3;
         this.probabilityOfChase = this.baseProbabilityOfChase;
-
-        setTimeout(() => { // release ghost after delay
-            this.isIdle = false;
-            this.isExitingBase = true;
-        }, delayRelease)
     }
 
     updatePositionOnMap() {
@@ -44,21 +47,27 @@ class Ghost {
     }
 
     initialisePosition() {
-        document.getElementById('pacman-container');
-        mapContext.fillStyle = this.colour;
-        mapContext.beginPath();
-        mapContext.arc(
+        const ghostOverlapObject = checkForGhostOverlap(this);
+        let colour = this.colour;
+        
+        if (ghostOverlapObject.isColourMixed) {
+            colour = ghostOverlapObject.mixedColour;
+        }
+
+        this.context.fillStyle = colour;
+        this.context.beginPath();
+        this.context.arc(
             this.posX*tileSize + 5, 
             this.posY*tileSize + 4, 
             tileSize / 1.75, 
             0, 
             Math.PI * 2
         );
-        mapContext.fill();
+        this.context.fill();
     }
 
     clearLastPosition() {
-        mapContext.clearRect( // IMPORTANT: this is constantly looped, removing the pixels over pacman. Adjust below values to position where the rectangle should be cut from. 
+        this.context.clearRect( // IMPORTANT: this is constantly looped, removing the pixels over pacman. Adjust below values to position where the rectangle should be cut from. 
             this.posX * tileSize - 11, 
             this.posY * tileSize - 12,  
             32, 
@@ -67,14 +76,11 @@ class Ghost {
     }
 
     idleMovement() {
-
-        if (this.direction.y === 0 || this.direction.y === -1) {
-            this.direction.y = 1;
+        if (this.posY === this.startY) {
+            this.posY += 1;
         } else {
-            this.direction.y = -1;
+            this.posY -= 1;
         }
-        
-        this.posY += this.direction.y;
     }
 
     releaseFromBase() {
@@ -190,9 +196,8 @@ class Ghost {
         if (isGameRunning) {
             this.handleIncreaseProbabilityOfChase();
             this.clearLastPosition();
-
-            if (points)
-
+            
+                
             if (this.isIdle) {
                 this.idleMovement();
             } else if (this.isExitingBase) {
@@ -200,14 +205,24 @@ class Ghost {
             } else if (this.isExploring) {
                 this.exploreMap();
             }
-            
+
             this.initialisePosition();
             this.updatePositionOnMap();
         }
     }
 }
 
-export const blinky = new Ghost('blinky', 'red', 11, 13, 500);
-export const pinky = new Ghost('pinky', 'pink', 13, 13, 4000);
-export const inky = new Ghost('pinky', 'cyan', 15, 13, 12000);
-export const clyde = new Ghost('pinky', 'orange', 17, 13, 20000);
+
+
+export const blinky = new Ghost('blinky', '#FF0000', 11, 13, 500);
+export const pinky = new Ghost('pinky', '#FFB8FF', 13, 13, 4000); // 4000
+export const inky = new Ghost('inky', '#00FFFF', 15, 13, 12000);
+export const clyde = new Ghost('clyde', '#FFB852', 17, 13, 20000);
+
+export const ghostArray = [blinky, pinky, inky, clyde];
+
+const ghostCanvasArray = generateGhostCanvasArray();
+
+ghostArray.forEach((ghost, i) => {
+    ghost.context = ghostCanvasArray[i].context;
+})

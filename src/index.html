@@ -4,20 +4,27 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Pac-Man</title>
         <link rel="stylesheet" href="./index.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     </head>
     <body>
-        <div class='rootDiv'>
-            <canvas id='points-container' class='pointsContainer' width="800" height="900"></canvas>
-            <canvas id='map-container' class='mapContainer' width="800" height="900"></canvas>
-            <p id='points-text'></p>
-            
-            <div id='game-end-div'>
-                <p>
-                    Game ended
-                </p>
+        <div id='root-div' class='rootDiv'>
+            <div id='canvas-container'>
+                <div id='game-end-div'>
+                    <p>
+                        Game over!
+                    </p>
+                    <button id='restart-game-btn'> 
+                        Play again?
+                    </button>
+                </div>
+                <canvas id='points-canvas' class='pointsCanvas'></canvas>
+                <canvas id='map-canvas' class='mapCanvas'></canvas>
             </div>
+            
+            <p id='points-text'></p>
         </div>
-
         <script type="module" src="index.js">
         </script>
     </body>

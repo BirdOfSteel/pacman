@@ -4,8 +4,9 @@ import { tileSize } from "../utils/map.js";
 import handleGetCollectable from "../utils/handleGetCollectable.js";
 import isNextPositionValid from "../utils/isNextPositionValid.js";
 import updateCharacterPositionOnMap from "../utils/updateCharacterPositionOnMap.js";
+import { setIsGameOver } from "../index.js";
 
-import { blinky, pinky, inky, clyde } from "./Ghost.js";
+import { ghostArray } from "./Ghost.js";
 
 class Pacman {
     constructor(startX, startY) {
@@ -29,6 +30,7 @@ class Pacman {
 
     initialisePosition() {
         document.getElementById('pacman-container');
+
         mapContext.fillStyle = 'yellow';
         mapContext.beginPath();
         mapContext.arc(
@@ -54,12 +56,10 @@ class Pacman {
 
     checkForGameEnd() {
         const pacmanLocation = {x: this.posX, y: this.posY};
-        const ghostsArray = [blinky, pinky, inky, clyde]; // add ghosts to this array for collision detection
-
         let isPacmanOnGhost = false;
 
-        for (let i = 0; i != ghostsArray.length; i++) {
-            const ghost = ghostsArray[i];
+        for (let i = 0; i != ghostArray.length; i++) {
+            const ghost = ghostArray[i];
             if (ghost.posX === pacmanLocation.x && ghost.posY === pacmanLocation.y) {
                 isPacmanOnGhost = true;
             } else if (ghost.prevX === pacmanLocation.x && ghost.prevY === pacmanLocation.y) {
@@ -69,13 +69,12 @@ class Pacman {
 
         if (isPacmanOnGhost) {
             setIsGameRunning(false);
+            setIsGameOver(true);
             document.getElementById('game-end-div').style.display = 'flex';
-            console.log("END");
         }
     }
 
     move() {
-        this.checkForGameEnd();
         this.clearLastPosition();
         this.prevX = this.posX;
         this.prevY = this.posY;
@@ -99,6 +98,7 @@ class Pacman {
 
         this.initialisePosition();
         this.updatePositionOnMap();
+        this.checkForGameEnd();
     }
 }
 

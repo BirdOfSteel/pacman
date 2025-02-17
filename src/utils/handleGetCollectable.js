@@ -1,14 +1,17 @@
-import { pointsMapArray, tileSize } from "./map.js";
+import { generatePointsMapArray, tileSize } from "./map.js";
 import { resetTotalPointsOnMap } from "./totalPointsOnMap.js";
 import { pointsContext } from "../ctx.js";
 
 export let points = 0;
 
 document.getElementById('points-text').innerHTML = `Points: ${points}`;
+let pointsMapArray = generatePointsMapArray();
 
 export function resetPoints() {
     points = 0;
     resetTotalPointsOnMap();
+    pointsMapArray = generatePointsMapArray();
+    document.getElementById('points-text').innerHTML = `Points: ${points}`;
 }
 
 export default function handleGetCollectable(posX, posY) {

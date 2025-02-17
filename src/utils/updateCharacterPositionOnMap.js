@@ -1,7 +1,10 @@
+import { mapCanvas } from "../ctx.js";
 import { mapArray } from "./map.js";
 
+let mapArrayCopy = mapArray.map(row => row.slice());
+
 export default function updateCharacterPositionOnMap(prevX, prevY, posX, posY, character) {
-    let prevRowAsArray = [...mapArray[prevY]];
+    let prevRowAsArray = [...mapArrayCopy[prevY]];
     let characterSymbol = null;
 
     switch (character) {
@@ -24,11 +27,11 @@ export default function updateCharacterPositionOnMap(prevX, prevY, posX, posY, c
 
     if (prevRowAsArray[prevX] === characterSymbol) { // erases last pinky position
         prevRowAsArray[prevX] = ' ';
-        mapArray[prevY] = prevRowAsArray.join('');
+        mapArrayCopy[prevY] = prevRowAsArray.join('');
     }
 
-    let currentRowAsArray = [...mapArray[posY]];
+    let currentRowAsArray = [...mapArrayCopy[posY]];
     currentRowAsArray[posX] = characterSymbol;
-    mapArray[posY] = currentRowAsArray.join('');
+    mapArrayCopy[posY] = currentRowAsArray.join('');
 }
   

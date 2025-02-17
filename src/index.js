@@ -1,17 +1,23 @@
-import { mapContext } from './ctx.js';
+import { mapCanvas, mapContext, pointsCanvas, pointsContext } from './ctx.js';
 
 import { pacman } from './classes/Pacman.js';
-import { blinky, pinky, inky, clyde } from './classes/Ghost.js';
+import { ghostArray } from './classes/Ghost.js';
 
 import { points, resetPoints } from './utils/handleGetCollectable.js';
 import hasAControlBeenPressed from './utils/hasAControlBeenPressed.js';
 import { initialiseMap } from './utils/map.js';
+import generateGhostCanvasArray from './utils/generateGhostCanvasArray.js';
 
 export let isGameRunning = false;
 export let gameInterval = null;
+export let isGameOver = false;
 
 export function setIsGameRunning(state) {
     isGameRunning = state;
+}
+
+export function setIsGameOver(state) {
+    isGameOver = state;
 }
 
 // Important variables:
@@ -20,33 +26,86 @@ export function setIsGameRunning(state) {
 //   by modifying difficultyIncrement and difficultyPerPoints.
 
 document.getElementById('points-text').innerHTML = `Points: ${points}`;
+const ghostCanvasArray = generateGhostCanvasArray();
+
 
 function prepareGame() {
+    ghostCanvasArray.map((canvasObject) => {
+        document.getElementById('canvas-container').append(canvasObject.canvas);
+    })
+
     resetPoints();
 
     pacman.posX = 14;
     pacman.posY = 23;
 
-    mapContext.clearRect(0, 0, mapContext.canvas.width, mapContext.canvas.height);
     initialiseMap();
     
     pacman.initialisePosition(mapContext);
-    blinky.initialisePosition(mapContext);
-    pinky.initialisePosition(mapContext);
-    inky.initialisePosition(mapContext);
-    clyde.initialisePosition(mapContext);
+
+    ghostArray.forEach((ghost) => {
+        ghost.initialisePosition();
+    })
 }
 
 prepareGame();
 
+function resetGame() {
+    document.getElementById('game-end-div').style.display = 'none';
+
+    isGameRunning = false;
+    isGameOver = false;
+    
+    mapContext.clearRect(0, 0, mapCanvas.width, mapCanvas.height);
+    pointsContext.clearRect(0, 0, pointsCanvas.width, pointsCanvas.height);
+
+    resetPoints();
+    initialiseMap();
+
+    ghostCanvasArray.forEach((canvasObject) => {
+        canvasObject.context.clearRect(0, 0, canvasObject.canvas.width, canvasObject.canvas.height)
+    })
+
+    ghostArray.forEach((ghost) => {
+        ghost.posX = ghost.startX;
+        ghost.posY = ghost.startY;
+        ghost.isIdle = true;
+        ghost.isExitingBase = false;
+        ghost.isExploring = false;
+        ghost.initialisePosition();
+    })
+
+    pacman.posX = 14;
+    pacman.posY = 23;
+    pacman.initialisePosition();
+    
+    timeoutIdArray.forEach((id) => {
+        clearTimeout(id)
+    })
+}
+document.getElementById('restart-game-btn').addEventListener('click', () => resetGame());
+
+let timeoutIdArray = []
+
+function startGhostReleaseTimers() {
+    ghostArray.forEach((ghost) => {
+        const timeout = setTimeout(() => {
+            ghost.isIdle = false;
+            ghost.isExitingBase = true;
+        }, ghost.releaseDelay)
+
+        timeoutIdArray.push(timeout)
+    })
+}
+
 function handleMovements() {
     if (!isGameRunning) return;
 
-    pacman.move(mapContext);
-    blinky.move(mapContext);
-    pinky.move(mapContext);
-    inky.move(mapContext);
-    clyde.move(mapContext);
+    pacman.move();
+    
+    ghostArray.forEach((ghost) => {
+        ghost.move();
+    })
 }
 
 function gameLoop() {
@@ -74,9 +133,10 @@ window.addEventListener('keydown', (e) => {
         pacman.queuedDirection = {x: 0, y: 1};
     }
 
-    if (!isGameRunning) {
+    if (!isGameRunning && !isGameOver) {
         if (hasAControlBeenPressed(e.key)) {
             setIsGameRunning(true);
+            startGhostReleaseTimers();
             gameLoop();
         }
     }
