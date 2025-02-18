@@ -44,7 +44,7 @@ export function generatePointsMapArray() {
         let pointsRow = [];
     
         for (let i = 0; i < currentRow.length; i++) {
-            if (currentRow[i] === '.') {
+            if (currentRow[i] === '.' || currentRow[i] === 'o') {
                 pointsRow.push(currentRow[i])
             } else {
                 pointsRow.push(" ")
@@ -126,10 +126,12 @@ export function initialiseMap() {
                 mapContext.fillRect(col * tileSize / 1, row * tileSize, tileSize, tileSize)
             } else if (char === '.') { // centering might need adjustment
                 addToTotalPointsOnMap();
-                pointsContext.fillStyle = 'yellow';
+                pointsContext.fillStyle = '#F4A300';
                 pointsContext.fillRect(col * tileSize + 1.5, row * tileSize + 1, tileSize / 4, tileSize / 4)
-            }
-            else {
+            } else if (char === 'o') {
+                pointsContext.fillStyle = '#F4A300';
+                pointsContext.fillRect(col * tileSize - 2.75, row * tileSize - 4, tileSize / 1.5, tileSize / 1.5)
+            } else {
                 mapContext.fillStyle = 'red';
             }
     

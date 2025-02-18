@@ -8,9 +8,19 @@ import hasAControlBeenPressed from './utils/hasAControlBeenPressed.js';
 import { initialiseMap } from './utils/map.js';
 import generateGhostCanvasArray from './utils/generateGhostCanvasArray.js';
 
+const [blinky, pinky, inky, clyde] = ghostArray;
+
 export let isGameRunning = false;
-export let gameInterval = null;
 export let isGameOver = false;
+
+const gameIntervalDelay = 200;
+
+let pacmanIntervalId = null;
+let blinkyIntervalId = null;
+let pinkyIntervalId = null;
+let inkyIntervalId = null;
+let clydeIntervalId = null;
+
 
 export function setIsGameRunning(state) {
     isGameRunning = state;
@@ -86,6 +96,7 @@ function resetGame() {
 document.getElementById('restart-game-btn').addEventListener('click', () => resetGame());
 
 let timeoutIdArray = []
+let ghostIntervalIdArray = [];
 
 function startGhostReleaseTimers() {
     ghostArray.forEach((ghost) => {
@@ -102,18 +113,28 @@ function handleMovements() {
     if (!isGameRunning) return;
 
     pacman.move();
-    
-    ghostArray.forEach((ghost) => {
-        ghost.move();
-    })
 }
+
+export function resetGhostIntervals() {
+    ghostIntervalIdArray.forEach((id) => {
+        clearTimeout(id)
+    })
+    
+    setGhostIntervals();
+}
+
+function setGhostIntervals() {
+    ghostIntervalIdArray.push(blinkyIntervalId = setInterval(() => blinky.move(), blinky.isFrightened ? gameIntervalDelay * 2 : gameIntervalDelay))
+    ghostIntervalIdArray.push(pinkyIntervalId = setInterval(() => pinky.move(), pinky.isFrightened ? gameIntervalDelay * 2 : gameIntervalDelay))
+    ghostIntervalIdArray.push(inkyIntervalId = setInterval(() => inky.move(), inky.isFrightened ? gameIntervalDelay * 2 : gameIntervalDelay))
+    ghostIntervalIdArray.push(clydeIntervalId = setInterval(() => clyde.move(), clyde.isFrightened ? gameIntervalDelay * 2 : gameIntervalDelay))
+}
+
 
 function gameLoop() {
     if (isGameRunning) {
-        console.log("running")
-        if (gameInterval === null) {
-            gameInterval = setInterval(() => handleMovements(), 200)
-        }
+        pacmanIntervalId = setInterval(() => pacman.move(), gameIntervalDelay)
+        setGhostIntervals();
     }
 }
 

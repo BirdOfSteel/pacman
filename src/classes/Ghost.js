@@ -1,4 +1,4 @@
-import { tileSize } from "../utils/map.js";
+import { mapArray, tileSize } from "../utils/map.js";
 import { isGameRunning } from "../index.js";
 import updateCharacterPositionOnMap from "../utils/updateCharacterPositionOnMap.js";
 import isNextPositionValid from "../utils/isNextPositionValid.js";
@@ -28,6 +28,8 @@ class Ghost {
         this.direction = {x: 0, y: 0};
         this.oppositeDirection = {x: 0, y: 0};
 
+        this.isFrightened = true;
+
         this.isIdle = true;
         this.isExitingBase = false;
         this.isExploring = false;
@@ -46,11 +48,17 @@ class Ghost {
         )
     }
 
+    respawn() {
+        this.posX + 5;
+    }
+
     initialisePosition() {
         const ghostOverlapObject = checkForGhostOverlap(this);
         let colour = this.colour;
         
-        if (ghostOverlapObject.isColourMixed) {
+        if (this.isFrightened) {
+            colour = '#4D94D1';
+        } else if (ghostOverlapObject.isColourMixed) {
             colour = ghostOverlapObject.mixedColour;
         }
 
@@ -91,10 +99,11 @@ class Ghost {
         } else {
             this.posX = 14;
             this.posY = 11;
-            this.recordLastPosition();
             this.isExitingBase = false;
             this.isExploring = true;
         }
+        
+        this.recordLastPosition();
     }
 
     moveRandomly() { // calculates and moves ghost to a random valid tile, but not backwards.
@@ -116,14 +125,13 @@ class Ghost {
         this.posY = randomAllowedCoordinate.y;
     }
 
-    chasePacman() { // uses pathfinding to chase pacman
+    usePathfinding() { // uses pathfinding to chase pacman
         const pathfinderArray = generatePath(this.posX, this.posY);
-        const pathDirection = convertPathingTileToDirection(this.previousPosition.x, this.previousPosition.y, pathfinderArray[0].x, pathfinderArray[0].y)
+        const pathDirection = convertPathingTileToDirection(this.posX, this.posY, pathfinderArray[0].x, pathfinderArray[0].y)
         const oppositePathDirection = pathDirection.oppositeDirection;
 
-
         if (pathfinderArray[0].x === oppositePathDirection.x && pathfinderArray[0].y === this.oppositeDirection.y) {
-            this.moveRandomly();    
+            this.moveRandomly(); // moves randomly if pathfinder moves ghost backwards
         } else {
             this.recordLastPosition();
             // this.posX MUST be set to pathFinderArray[0].y co-ordinate, and so on for posX. Flipping them will break it.
@@ -178,15 +186,29 @@ class Ghost {
         const pathfinderArray = generatePath(this.posX, this.posY);
         const pathDirection = convertPathingTileToDirection(this.previousPosition.x, this.previousPosition.y, pathfinderArray[0].x, pathfinderArray[0].y)
 
-        if (this.probabilityOfChase > randomNumber) {
-            // pathDirection.direction.x and .y will equal 0 if pathfinder wants to go backwards. if this happens, ghost will move randomly instead.
-            if (pathDirection.direction.x === 0 && pathDirection.direction.y === 0) {
-                this.moveRandomly();
-            } else {
-                this.chasePacman();
-            }
+        if (this.isFrightened) {
+            this.moveRandomly(); // moves randomly when frightened
         } else {
-            this.moveRandomly();
+            if (this.probabilityOfChase > randomNumber) {
+                // pathDirection.direction.x and .y will equal 0 if pathfinder wants to go backwards. if this happens, ghost will move randomly instead.
+                if (pathDirection.direction.x === 0 && pathDirection.direction.y === 0) {
+                    this.moveRandomly();
+                } else {
+                    this.usePathfinding();
+                }
+            } else {
+                this.moveRandomly();
+            }
+        }
+
+
+        // handles teleporting
+        const characterOnMapArray = mapArray[this.posY][this.posX];
+
+        if (characterOnMapArray === '>') {
+            this.posX = 27;
+        } else if (characterOnMapArray === '<') {
+            this.posX = 1;
         }
         
         this.recordDirection();
@@ -208,6 +230,7 @@ class Ghost {
 
             this.initialisePosition();
             this.updatePositionOnMap();
+
         }
     }
 }
