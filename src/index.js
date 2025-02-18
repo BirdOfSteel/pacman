@@ -71,6 +71,11 @@ function resetGame() {
 
     resetPoints();
     initialiseMap();
+    
+    clearInterval(pacmanIntervalId)
+    ghostIntervalIdArray.forEach((id) => {
+        clearTimeout(id)
+    })
 
     ghostCanvasArray.forEach((canvasObject) => {
         canvasObject.context.clearRect(0, 0, canvasObject.canvas.width, canvasObject.canvas.height)
@@ -93,6 +98,7 @@ function resetGame() {
         clearTimeout(id)
     })
 }
+
 document.getElementById('restart-game-btn').addEventListener('click', () => resetGame());
 
 let timeoutIdArray = []
