@@ -10,11 +10,16 @@
     </head>
     <body>
         <div id='root-div' class='rootDiv'>
-            <div id='canvas-container'>
+            <div id='game-container'>
+                <div id='info-div'>
+                    <p id='level-text'></p>
+                    <p id='points-text'></p>
+                    <canvas id='lives-canvas'></canvas>
+                </div>
+
                 <div id='game-end-div'>
-                    <p>
-                        Game over!
-                    </p>
+                    <p id='game-end-div-text'></p>
+                    <p id='game-end-div-points'></p>
                     <button id='restart-game-btn'> 
                         Play again?
                     </button>
@@ -22,8 +27,6 @@
                 <canvas id='points-canvas' class='pointsCanvas'></canvas>
                 <canvas id='map-canvas' class='mapCanvas'></canvas>
             </div>
-            
-            <p id='points-text'></p>
         </div>
         <script type="module" src="index.js">
         </script>

@@ -15,7 +15,6 @@ export default function checkForGhostOverlap(ghost) {
             coloursToMix.push(selectedGhost.colour);
             coloursToMix.push(ghost.colour)
             isColourMixed = true;
-            console.log(selectedGhost.posX, selectedGhost.posY)
         }
     });
 

@@ -1,11 +1,11 @@
 import { mapContext, pointsContext, pointsCanvas, mapCanvas } from '../ctx.js';
-import { addToTotalPointsOnMap } from './totalPointsOnMap.js';
+import { addOneToTotalPointsOnMap } from './points/pointsHandler.js';
 
 export const tileSize = 20;
 
 export const mapArray = [
-    "┌---------------------------┐",
-    "|............┌-┐............|",
+    "┌------------┐ ┌------------┐",
+    "|............| |............|",
     "|.┌--┐.┌---┐.| |.┌---┐.┌--┐.|",
     "|o|  |.|   |.| |.|   |.|  |o|",
     "|.└--┘.└---┘.└-┘.└---┘.└--┘.|",
@@ -73,10 +73,10 @@ export function initialiseMap() {
     
             if (char === '|') {
                 mapContext.fillStyle ='#1A2AFF';
-                mapContext.fillRect(col * tileSize, row * tileSize - tileSize/3, tileSize /3, tileSize)
+                mapContext.fillRect(col * tileSize, row * tileSize - tileSize/4, tileSize /3, tileSize)
             } else if (char === '-') {
                 mapContext.fillStyle = '#1A2AFF';
-                mapContext.fillRect(col * tileSize - tileSize/3, row * tileSize, tileSize, tileSize /3)
+                mapContext.fillRect(col * tileSize - tileSize/4, row * tileSize, tileSize, tileSize /3)
             } else if (char === '┌') {
                 mapContext.beginPath();
                 mapContext.strokeStyle = '#1A2AFF';
@@ -125,10 +125,11 @@ export function initialiseMap() {
                 mapContext.fillStyle = 'black';
                 mapContext.fillRect(col * tileSize / 1, row * tileSize, tileSize, tileSize)
             } else if (char === '.') { // centering might need adjustment
-                addToTotalPointsOnMap();
+                addOneToTotalPointsOnMap();
                 pointsContext.fillStyle = '#F4A300';
                 pointsContext.fillRect(col * tileSize + 1.5, row * tileSize + 1, tileSize / 4, tileSize / 4)
             } else if (char === 'o') {
+                addOneToTotalPointsOnMap();
                 pointsContext.fillStyle = '#F4A300';
                 pointsContext.fillRect(col * tileSize - 2.75, row * tileSize - 4, tileSize / 1.5, tileSize / 1.5)
             } else {

@@ -4,17 +4,20 @@ import updateCharacterPositionOnMap from "../utils/updateCharacterPositionOnMap.
 import isNextPositionValid from "../utils/isNextPositionValid.js";
 import findWhereGhostCanMove from "../utils/findWhereGhostCanMove.js";
 import convertPathingTileToDirection from "../utils/convertPathingTileToDirection.js";
-import { points } from "../utils/handleGetCollectable.js";
+import { points } from "../utils/points/pointsHandler.js";
 import { generatePath } from "../utils/pathFinder.js";
-import { totalPointsOnMap } from "../utils/totalPointsOnMap.js";
+import { totalPointsOnMap } from "../utils/points/pointsHandler.js";
 import checkForGhostOverlap from "../utils/checkForGhostOverlap.js";
 import generateGhostCanvasArray from "../utils/generateGhostCanvasArray.js";
-
+import { pacman } from "./Pacman.js";
 
 class Ghost {
     constructor(name, colour, startX, startY, releaseDelay) {
         this.name = name;
         this.colour = colour;
+
+        this.frightenedColour = '#4D94D1';
+        this.flashColour = '#cfcfcf';
 
         this.releaseDelay = releaseDelay;
 
@@ -28,13 +31,14 @@ class Ghost {
         this.direction = {x: 0, y: 0};
         this.oppositeDirection = {x: 0, y: 0};
 
-        this.isFrightened = true;
+        this.flashInterval = null;
+        this.isFrightened = false;
 
         this.isIdle = true;
         this.isExitingBase = false;
         this.isExploring = false;
 
-        this.baseProbabilityOfChase = 0.3;
+        this.baseProbabilityOfChase = 0.1;
         this.probabilityOfChase = this.baseProbabilityOfChase;
     }
 
@@ -48,8 +52,12 @@ class Ghost {
         )
     }
 
-    respawn() {
-        this.posX + 5;
+    startFlashing() {
+        this.flashInterval = setInterval(() => {
+            this.frightenedColour = this.frightenedColour === this.flashColour ? '#4D94D1' : '#cfcfcf';
+            this.initialisePosition();
+        }, 350)
+        this.initialisePosition();
     }
 
     initialisePosition() {
@@ -57,7 +65,7 @@ class Ghost {
         let colour = this.colour;
         
         if (this.isFrightened) {
-            colour = '#4D94D1';
+            colour = this.frightenedColour;
         } else if (ghostOverlapObject.isColourMixed) {
             colour = ghostOverlapObject.mixedColour;
         }
@@ -104,6 +112,16 @@ class Ghost {
         }
         
         this.recordLastPosition();
+    } 
+
+    resetValues() {
+        this.clearLastPosition();
+        this.posX = this.startX;
+        this.posY = this.startY;
+        this.isIdle = true;
+        this.isExitingBase = false;
+        this.isExploring = false;
+        this.initialisePosition();
     }
 
     moveRandomly() { // calculates and moves ghost to a random valid tile, but not backwards.
@@ -177,8 +195,12 @@ class Ghost {
         const difficultyPerPoints = Math.floor(totalPointsOnMap / 6); // higher divider means difficulty increases every fewer points reached
         const currentNumberOfPoints = points / 10;
 
-        const difficultyMultiplier = Math.floor(currentNumberOfPoints / difficultyPerPoints); // multiplier for increasing difficulty, based on obtained points.
+        const difficultyMultiplier = Math.floor(currentNumberOfPoints / difficultyPerPoints);
         this.probabilityOfChase = this.baseProbabilityOfChase + (difficultyIncrement * difficultyMultiplier);
+    
+        if (this.probabilityOfChase >= 0.8) { // pathfinding is capped at being used 80% of the time
+            this.probabilityOfChase = 0.8;
+        }
     }
     
     exploreMap() {
@@ -218,8 +240,7 @@ class Ghost {
         if (isGameRunning) {
             this.handleIncreaseProbabilityOfChase();
             this.clearLastPosition();
-            
-                
+
             if (this.isIdle) {
                 this.idleMovement();
             } else if (this.isExitingBase) {
@@ -230,17 +251,16 @@ class Ghost {
 
             this.initialisePosition();
             this.updatePositionOnMap();
-
         }
     }
 }
 
 
 
-export const blinky = new Ghost('blinky', '#FF0000', 11, 13, 500);
+export const blinky = new Ghost('blinky', '#FF0000', 11, 13, 500); // 500
 export const pinky = new Ghost('pinky', '#FFB8FF', 13, 13, 4000); // 4000
-export const inky = new Ghost('inky', '#00FFFF', 15, 13, 12000);
-export const clyde = new Ghost('clyde', '#FFB852', 17, 13, 20000);
+export const inky = new Ghost('inky', '#00FFFF', 15, 13, 12000); // 12000
+export const clyde = new Ghost('clyde', '#FFB852', 17, 13, 20000); // 20000
 
 export const ghostArray = [blinky, pinky, inky, clyde];
 

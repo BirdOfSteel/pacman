@@ -24,6 +24,7 @@ function convertMapToPathingGrid() {
     return pathingGrid;
 }
 
+// A* pathfinder by https://github.com/bgrins/javascript-astar
 export default function pathTo(node) {
     var curr = node;
     var path = [];

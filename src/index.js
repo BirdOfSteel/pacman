@@ -1,12 +1,14 @@
 import { mapCanvas, mapContext, pointsCanvas, pointsContext } from './ctx.js';
-
 import { pacman } from './classes/Pacman.js';
 import { ghostArray } from './classes/Ghost.js';
-
-import { points, resetPoints } from './utils/handleGetCollectable.js';
+import { addOneLife, livesManager, resetLives } from './utils/lives/livesManager.js';
+import { points, pointsCollected, resetPoints, resetTotalPointsOnMap } from './utils/points/pointsHandler.js';
 import hasAControlBeenPressed from './utils/hasAControlBeenPressed.js';
 import { initialiseMap } from './utils/map.js';
 import generateGhostCanvasArray from './utils/generateGhostCanvasArray.js';
+import { level } from './utils/levels/levelManager.js';
+import { resetPointsCollected } from './utils/points/pointsHandler.js';
+import { resetPointsMapArray } from './utils/handleGetCollectable.js';
 
 const [blinky, pinky, inky, clyde] = ghostArray;
 
@@ -15,12 +17,7 @@ export let isGameOver = false;
 
 const gameIntervalDelay = 200;
 
-let pacmanIntervalId = null;
-let blinkyIntervalId = null;
-let pinkyIntervalId = null;
-let inkyIntervalId = null;
-let clydeIntervalId = null;
-
+export let pacmanIntervalId = null;
 
 export function setIsGameRunning(state) {
     isGameRunning = state;
@@ -36,20 +33,28 @@ export function setIsGameOver(state) {
 //   by modifying difficultyIncrement and difficultyPerPoints.
 
 document.getElementById('points-text').innerHTML = `Points: ${points}`;
+document.getElementById('restart-game-btn').addEventListener('click', () => resetGame());
+
 const ghostCanvasArray = generateGhostCanvasArray();
 
+export function clearAllIntervals() {
+    clearInterval(pacmanIntervalId);
+    ghostIntervalIdArray.forEach((id) => {
+        clearInterval(id);
+    });
+}
 
 function prepareGame() {
+    document.getElementById('level-text').innerHTML = `Level: ${level}`;
     ghostCanvasArray.map((canvasObject) => {
-        document.getElementById('canvas-container').append(canvasObject.canvas);
+        document.getElementById('game-container').append(canvasObject.canvas);
     })
 
-    resetPoints();
+    livesManager();
+    initialiseMap();
 
     pacman.posX = 14;
     pacman.posY = 23;
-
-    initialiseMap();
     
     pacman.initialisePosition(mapContext);
 
@@ -60,7 +65,32 @@ function prepareGame() {
 
 prepareGame();
 
-function resetGame() {
+export function prepareNextLevel() {
+    addOneLife();
+    setIsGameRunning(false);
+
+    mapContext.clearRect(0, 0, mapCanvas.width, mapCanvas.height);
+    pointsContext.clearRect(0, 0, pointsCanvas.width, pointsCanvas.height);
+
+    resetPointsMapArray();
+    resetTotalPointsOnMap();
+    resetPointsCollected();
+    initialiseMap();
+    clearAllIntervals();
+
+    ghostIntervalIdArray.forEach((id) => { // reset setTimeouts for ghost release
+        clearTimeout(id)
+    })
+
+    ghostArray.forEach((ghost) => { // reset ghost states
+        ghost.resetValues();
+    })
+
+    pacman.resetPosition();
+    pacman.initialisePosition();
+}
+
+export function resetGame() {
     document.getElementById('game-end-div').style.display = 'none';
 
     isGameRunning = false;
@@ -70,10 +100,15 @@ function resetGame() {
     pointsContext.clearRect(0, 0, pointsCanvas.width, pointsCanvas.height);
 
     resetPoints();
+    resetPointsCollected();
+    resetPointsMapArray();
+    resetLives();
     initialiseMap();
+    removeGhostIntervals();
+
+    clearInterval(pacmanIntervalId);
     
-    clearInterval(pacmanIntervalId)
-    ghostIntervalIdArray.forEach((id) => {
+    ghostIntervalIdArray.forEach((id) => { // reset setTimeouts for ghost release
         clearTimeout(id)
     })
 
@@ -99,7 +134,6 @@ function resetGame() {
     })
 }
 
-document.getElementById('restart-game-btn').addEventListener('click', () => resetGame());
 
 let timeoutIdArray = []
 let ghostIntervalIdArray = [];
@@ -115,32 +149,27 @@ function startGhostReleaseTimers() {
     })
 }
 
-function handleMovements() {
-    if (!isGameRunning) return;
-
-    pacman.move();
+export function removeGhostIntervals() {
+    ghostIntervalIdArray.forEach((id) => {
+        clearInterval(id);
+    })
 }
 
-export function resetGhostIntervals() {
-    ghostIntervalIdArray.forEach((id) => {
-        clearTimeout(id)
-    })
-    
+function setAllIntervals() {
+    pacmanIntervalId = setInterval(() => pacman.move(), gameIntervalDelay)
     setGhostIntervals();
 }
 
-function setGhostIntervals() {
-    ghostIntervalIdArray.push(blinkyIntervalId = setInterval(() => blinky.move(), blinky.isFrightened ? gameIntervalDelay * 2 : gameIntervalDelay))
-    ghostIntervalIdArray.push(pinkyIntervalId = setInterval(() => pinky.move(), pinky.isFrightened ? gameIntervalDelay * 2 : gameIntervalDelay))
-    ghostIntervalIdArray.push(inkyIntervalId = setInterval(() => inky.move(), inky.isFrightened ? gameIntervalDelay * 2 : gameIntervalDelay))
-    ghostIntervalIdArray.push(clydeIntervalId = setInterval(() => clyde.move(), clyde.isFrightened ? gameIntervalDelay * 2 : gameIntervalDelay))
+export function setGhostIntervals() {
+    ghostArray.forEach((ghost) => {
+        ghostIntervalIdArray.push(setInterval(() => ghost.move(), ghost.isFrightened ? gameIntervalDelay * 2 : gameIntervalDelay))
+    })
 }
 
 
-function gameLoop() {
+function startGame() { // sets intervals to pacman and ghost
     if (isGameRunning) {
-        pacmanIntervalId = setInterval(() => pacman.move(), gameIntervalDelay)
-        setGhostIntervals();
+        setAllIntervals();
     }
 }
 
@@ -148,27 +177,23 @@ function gameLoop() {
 // controls
 
 window.addEventListener('keydown', (e) => {
-    e.preventDefault();
+    if (!isGameOver) {
+        e.preventDefault();
 
-    if (e.key === 'ArrowUp' || e.key === 'w') {
-        pacman.queuedDirection = {x: 0, y: -1};
-    } else if (e.key === 'ArrowRight' || e.key === 'd') {
-        pacman.queuedDirection = {x: 1, y: 0};
-    } else if (e.key === 'ArrowLeft' || e.key === 'a') {
-        pacman.queuedDirection = {x: -1, y: 0};
-    } else if (e.key === 'ArrowDown' || e.key === 's') {
-        pacman.queuedDirection = {x: 0, y: 1};
-    }
+        if (e.key === 'ArrowUp' || e.key === 'w') {
+            pacman.queuedDirection = {x: 0, y: -1};
+        } else if (e.key === 'ArrowRight' || e.key === 'd') {
+            pacman.queuedDirection = {x: 1, y: 0};
+        } else if (e.key === 'ArrowLeft' || e.key === 'a') {
+            pacman.queuedDirection = {x: -1, y: 0};
+        } else if (e.key === 'ArrowDown' || e.key === 's') {
+            pacman.queuedDirection = {x: 0, y: 1};
+        }
 
-    if (!isGameRunning && !isGameOver) {
-        if (hasAControlBeenPressed(e.key)) {
+        if (hasAControlBeenPressed(e.key) && !isGameRunning) {
             setIsGameRunning(true);
             startGhostReleaseTimers();
-            gameLoop();
+            startGame();
         }
-    }
-
-    if (e.key === 'i') {
-        prepareGame();
     }
 })
